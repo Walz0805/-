@@ -4,6 +4,8 @@
 #include<time.h>
 #include<stdlib.h>
 #include<math.h>
+#include <algorithm>
+#include <vector>
 
 #define ROWS 15
 #define COLS 15
@@ -34,7 +36,10 @@ struct Game
 
     // 当前棋手
     ChessType currentChessType;
-
+    // 游戏模式，0为人人对战，1为人机对战
+    int gameMode;
+    // 人机对战难度，0为简单，1为困难
+    int difficulty;
 };
 
 // 游戏初始化
@@ -50,10 +55,28 @@ bool leftOblique(Game* pthis, int chess);
 bool RightOblique(Game* pthis, int chess);
 bool judge(Game* pthis);
 
+// 困难难度人机落子
+void aiMoveHard(Game* pthis);
+
 int main()
 {
     Game game;
     init(&game, 960, 600);
+
+    // 选择游戏模式
+    int mode;
+    printf("选择游戏模式：0 - 人人对战，1 - 人机对战\n");
+    scanf_s("%d", &mode);
+    game.gameMode = mode;
+
+    if (game.gameMode == 1)
+    {
+        // 选择难度
+        int diff;
+        printf("选择难度：0 - 简单，1 - 困难\n");
+        scanf_s("%d", &diff);
+        game.difficulty = diff;
+    }
 
     // 用于记录开始时间，以判断是否到了1秒
     clock_t start_time = clock();
@@ -88,6 +111,165 @@ int main()
             if (peekmessage(&game.msg))
             {
                 update(&game);
+            }
+
+            // 人机对战，AI落子
+            if (game.gameMode == 1 && game.currentChessType == White)
+            {
+                if (game.difficulty == 0)
+                {
+                    int count3 = 0;
+                    if (game.map[7][7] == None)
+                    {
+                        game.map[7][7] = White;
+                        game.currentChessType = (ChessType)-game.currentChessType;
+                    }
+                    else
+                    {
+                        if (game.currentChessType == White)
+                        {
+                            if (game.map[game.row][game.col] != None)
+                            {
+                               
+                                // 简单难度下如果人已经落子，AI在四周随机落子
+                                int count = 0;
+                                int randPos[64][2];
+                                // 八个方向的横坐标偏移量，对应上、右、下、左、右上、右下、左上、左下
+                                int dx[] = { -1, 0, 1, 0, -1, -1, 1, 1 };
+                                // 八个方向的纵坐标偏移量
+                                int dy[] = { 0, -1, 0, 1, -1, 1, -1, 1 };
+
+                                // 遍历八个方向
+                                for (int i = 0; i < 8; i++)
+                                {
+                                    int newRow = game.row + dx[i];
+                                    int newCol = game.col + dy[i];
+                                    // 判断新坐标位置是否在棋盘范围内且该位置为空（无棋子）
+                                    if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS && game.map[newRow][newCol] == None)
+                                    {
+                                        // 进一步判断与已有AI棋子能否构成日字形状（这里简单示意，实际可能需要更严谨的判断逻辑）
+                                        bool canFormRi = false;
+                                        // 再次遍历八个方向，查找是否存在相邻的AI棋子能构成日字
+                                        
+                                        
+                                        int checkRow = newRow +2;
+                                        int checkCol = newCol +1;
+                                        if (checkRow >= 0 && checkRow < ROWS && checkCol >= 0 && checkCol < COLS && game.map[checkRow][checkCol] == White)
+                                        {
+                                            // 如果在某个方向上找到相邻的AI棋子，标记为可以构成日字
+                                            canFormRi = true;
+                                        }
+                                        checkRow = newRow -2;
+                                        checkCol = newCol + 1;
+                                        if (checkRow >= 0 && checkRow < ROWS && checkCol >= 0 && checkCol < COLS && game.map[checkRow][checkCol] == White)
+                                        {
+                                            // 如果在某个方向上找到相邻的AI棋子，标记为可以构成日字
+                                            canFormRi = true;
+                                        }
+                                        checkRow = newRow + 2;
+                                        checkCol = newCol - 1;
+                                        if (checkRow >= 0 && checkRow < ROWS && checkCol >= 0 && checkCol < COLS && game.map[checkRow][checkCol] == White)
+                                        {
+                                            // 如果在某个方向上找到相邻的AI棋子，标记为可以构成日字
+                                            canFormRi = true;
+                                        }
+                                        checkRow = newRow - 2;
+                                        checkCol = newCol - 1;
+                                        if (checkRow >= 0 && checkRow < ROWS && checkCol >= 0 && checkCol < COLS && game.map[checkRow][checkCol] == White)
+                                        {
+                                            // 如果在某个方向上找到相邻的AI棋子，标记为可以构成日字
+                                            canFormRi = true;
+                                        }
+                                        checkRow = newRow + 1;
+                                        checkCol = newCol + 2;
+                                        if (checkRow >= 0 && checkRow < ROWS && checkCol >= 0 && checkCol < COLS && game.map[checkRow][checkCol] == White)
+                                        {
+                                            // 如果在某个方向上找到相邻的AI棋子，标记为可以构成日字
+                                            canFormRi = true;
+                                        }
+                                        checkRow = newRow - 1;
+                                        checkCol = newCol + 2;
+                                        if (checkRow >= 0 && checkRow < ROWS && checkCol >= 0 && checkCol < COLS && game.map[checkRow][checkCol] == White)
+                                        {
+                                            // 如果在某个方向上找到相邻的AI棋子，标记为可以构成日字
+                                            canFormRi = true;
+                                        }
+                                        checkRow = newRow + 1;
+                                        checkCol = newCol - 2;
+                                        if (checkRow >= 0 && checkRow < ROWS && checkCol >= 0 && checkCol < COLS && game.map[checkRow][checkCol] == White)
+                                        {
+                                            // 如果在某个方向上找到相邻的AI棋子，标记为可以构成日字
+                                            canFormRi = true;
+                                        }
+                                        checkRow = newRow - 1;
+                                        checkCol = newCol - 2;
+                                        if (checkRow >= 0 && checkRow < ROWS && checkCol >= 0 && checkCol < COLS && game.map[checkRow][checkCol] == White)
+                                        {
+                                            // 如果在某个方向上找到相邻的AI棋子，标记为可以构成日字
+                                            canFormRi = true;
+                                        }
+                                        if (canFormRi)
+                                        {
+                                            randPos[count][0] = newRow;
+                                            randPos[count][1] = newCol;
+                                            count++;
+                                        }
+                                    }
+                                }
+                                if (count > 0&&(count3%3==1))
+                                {
+                                    int randomIndex = rand() % count;
+                                    game.map[randPos[randomIndex][0]][randPos[randomIndex][1]] = White;
+                                    game.currentChessType = (ChessType)-game.currentChessType;
+                                }
+                                else {
+                                    if (game.map[7][7] == None)
+                                    {
+                                        game.map[7][7] = White;
+                                        game.currentChessType = (ChessType)-game.currentChessType;
+                                    }
+                                    else
+                                    {
+                                        if (game.currentChessType == White)
+                                        {
+                                            if (game.map[game.row][game.col] != None)
+                                            {
+                                                // 简单难度下如果人已经落子，AI在四周随机落子
+                                                int dx[] = { -1,0,1,0 };
+                                                int dy[] = { 0, -1,0,1 };
+                                                int count = 0;
+                                                int randPos[4][2];
+                                                for (int i = 0; i < 4; i++)
+                                                {
+                                                    int newRow = game.row + dx[i];
+                                                    int newCol = game.col + dy[i];
+                                                    if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS && game.map[newRow][newCol] == None)
+                                                    {
+                                                        randPos[count][0] = newRow;
+                                                        randPos[count][1] = newCol;
+                                                        count++;
+                                                    }
+                                                }
+                                                if (count > 0)
+                                                {
+                                                    int randomIndex = rand() % count;
+                                                    game.map[randPos[randomIndex][0]][randPos[randomIndex][1]] = White;
+                                                    game.currentChessType = (ChessType)-game.currentChessType;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    count3++;
+                }
+                else if (game.difficulty == 1)
+                {
+                    // 困难难度AI落子，此处为占位，实际需实现剪枝和决策树算法
+                    aiMoveHard(&game);
+                }
             }
 
             render(&game);
@@ -127,7 +309,15 @@ void init(Game* pthis, int w, int h)
     pthis->isRunning = true;
     pthis->row = -1;
     pthis->col = -1;
-    pthis->currentChessType = rand() % 2 ? Black : White;
+    // 随机决定人机对战时谁先手
+    if (pthis->gameMode == 1)
+    {
+        pthis->currentChessType = (rand() % 2 == 0) ? Black : White;
+    }
+    else
+    {
+        pthis->currentChessType = rand() % 2 ? Black : White;
+    }
     // 初始化棋盘
     memset(pthis->map, 0, sizeof(pthis->map));
 }
@@ -321,4 +511,10 @@ bool RightOblique(Game* pthis, int chess)
             return true;
     }
     return false;
+}
+
+
+// 困难难度人机落子（此处仅为占位，实际需实现剪枝和决策树算法）
+void aiMoveHard(Game* pthis) {
+
 }
