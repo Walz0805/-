@@ -61,13 +61,12 @@ int main()
     loadimage(&img_bg, L"Resource/images/bk.jpg");
 
     //处理鼠标操作，不断地去处理
-
+    MessageBox(GetHWnd(), L"点击确定 开始游戏", L"", MB_OK);
     //游戏主循环
     while (game.isRunning)
     {
         if (judge(&game))
         {
-            MessageBox(GetHWnd(), L"结束了", L"....", MB_OK);
             game.isRunning = false;
         }
 
@@ -135,6 +134,18 @@ void render(Game* pthis)
         }
     }
 
+    // 在右上角显示当前下棋方提示信息
+    settextcolor(WHITE);
+    settextstyle(20, 0, _T("宋体"));
+    if (pthis->currentChessType == Black)
+    {
+        outtextxy(800, 20, _T("当前轮到黑棋下棋"));
+    }
+    else
+    {
+        outtextxy(800, 20, _T("当前轮到白棋下棋"));
+    }
+
     //绘制当前鼠标所在的提示框
     printf("%d %d\n", pthis->row, pthis->col);
     if (pthis->row != -1 && pthis->col != -1)
@@ -178,22 +189,30 @@ void update(Game* pthis)
         //切换棋手
         pthis->currentChessType = (ChessType)-pthis->currentChessType;
     }
+    else if (pthis->msg.message == WM_LBUTTONDOWN &&    //鼠标左键点击
+        pthis->row != -1 && pthis->col != -1 &&            //点击了合法的位置
+        pthis->map[pthis->row][pthis->col] != None)
+    {
+        MessageBox(GetHWnd(), L"这个位置已经有棋子了", L"", MB_OK);
+    }
 }
 
 bool judge(Game* pthis)
 {
-    int who = -pthis->currentChessType;
-    if (horiaontal(pthis, who))
-        return true;
+    bool black_win = horiaontal(pthis, Black) || vertical(pthis, Black) || leftOblique(pthis, Black) || RightOblique(pthis, Black);
+    bool white_win = horiaontal(pthis, White) || vertical(pthis, White) || leftOblique(pthis, White) || RightOblique(pthis, White);
 
-    if (vertical(pthis, who))
+    if (black_win)
+    {
+        MessageBox(GetHWnd(), L"黑棋获胜！游戏结束", L"", MB_OK);
         return true;
+    }
+    if (white_win)
+    {
+        MessageBox(GetHWnd(), L"白棋获胜！游戏结束", L"", MB_OK);
+        return true;
+    }
 
-    if (leftOblique(pthis, who))
-        return true;
-
-    if (RightOblique(pthis, who))
-        return true;
     return false;
 }
 
