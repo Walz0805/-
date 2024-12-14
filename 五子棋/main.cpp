@@ -12,7 +12,6 @@
 #define GRID_SIZE 38
 #define XOFFSET 213
 #define YOFFSET 34
-
 enum ChessType
 {
     None = 0,
@@ -55,8 +54,7 @@ bool leftOblique(Game* pthis, int chess);
 bool RightOblique(Game* pthis, int chess);
 bool judge(Game* pthis);
 
-// 困难难度人机落子
-void aiMoveHard(Game* pthis);
+// 困难难度人机落子void aiMoveHard(Game* pthis);
 
 int main()
 {
@@ -267,9 +265,757 @@ int main()
                 }
                 else if (game.difficulty == 1)
                 {
-                    // 困难难度AI落子，此处为占位，实际需实现剪枝和决策树算法
-                    aiMoveHard(&game);
-                }
+                    // 困难难度AI落子
+					if (game.map[7][7] == None)
+					{
+						game.map[7][7] = White;
+						game.currentChessType = (ChessType)-game.currentChessType;
+					}
+					else
+					{
+						if (game.currentChessType == White)
+						{
+							if (game.map[game.row][game.col] != None)
+							{
+								int dx1[] = { -1,0,1,0 };
+								int dy1[] = { 0, -1,0,1 };
+								int count = 0;
+								int randPos[4][2];
+								int i = 0;
+								int j = 0;
+								int k = 0;
+								int sum1 = 0;
+								int sum2 = 0;
+								//判断行电脑是否已经连成四子，如果连成四子，则下第五子获得胜利
+								for (i = 0; i < 15; i++)
+								{
+									for (j = 0; j < 15 - 4; j++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i][j + k] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i][j + k] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum2 > 3)
+										{
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i][j + k] == None)
+												{
+													game.map[i][j + k] = White;
+													//printf("行四子连五\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断列电脑是否已经连成四子，如果连成四子，则下第五子获得胜利
+								for (j = 0; j < 15; j++)
+								{
+									for (i = 0; i < 15 - 4; i++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i + k][j] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i + k][j] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum2 > 3)
+										{
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i + k][j] == None)
+												{
+													game.map[i + k][j] = White;
+													//printf("列四子连五\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断对角线电脑是否已经连成四子，如果连成四子，则下第五子获得胜利
+								for (i = 0; i < 15 - 4; i++)
+								{
+									for (j = 0; j < 15 - 4; j++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i + k][j + k] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i + k][j + k] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum2 > 3)
+										{
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i + k][j + k] == None)
+												{
+													game.map[i + k][j + k] = White;
+													//printf("对角线四子连五\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断反对角线电脑是否已经连成四子，如果连成四子，则下第五子获得胜利
+								for (i = 0; i < 15 - 4; i++)
+								{
+									for (j = 4; j < 15; j++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i + k][j - k] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i + k][j - k] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum2 > 3)
+										{
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i + k][j - k] == None)
+												{
+													game.map[i + k][j - k] = White;
+													//printf("反对角线四子连五\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断行玩家是否已经连成四子，如果连成四子，则下子阻挡玩家获得胜利
+								for (i = 0; i < 15; i++)
+								{
+									for (j = 0; j < 15 - 4; j++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i][j + k] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i][j + k] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum1 > 3)
+										{
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i][j + k] == None)
+												{
+													game.map[i][j + k] = White;
+													//printf("行玩家四子，阻挡玩家五子\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断列玩家是否已经连成四子，如果连成四子，则下子阻挡玩家获得胜利
+								for (j = 0; j < 15; j++)
+								{
+									for (i = 0; i < 15 - 4; i++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i + k][j] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i + k][j] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum1 > 3)
+										{
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i + k][j] == None)
+												{
+													game.map[i + k][j] = White;
+													//printf("列玩家四子，阻挡玩家五子\n");
+													goto change;
+												}
+											}
+										}
+
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断对角线玩家是否已经连成四子，如果连成四子，则下子阻挡玩家获得胜利
+								for (i = 0; i < 15 - 4; i++)
+								{
+									for (j = 0; j < 15 - 4; j++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i + k][j + k] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i + k][j + k] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum1 > 3)
+										{
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i + k][j + k] == None)
+												{
+													game.map[i + k][j + k] = White;
+													//printf("对角线玩家四子，阻挡玩家五子\n");
+													goto change;
+												}
+											}
+										}
+
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断反对角线玩家是否已经连成四子，如果连成四子，则下子阻挡玩家获得胜利
+								for (i = 0; i < 15 - 4; i++)
+								{
+									for (j = 4; j < 15; j++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i + k][j - k] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i + k][j - k] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum1 > 3)
+										{
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i + k][j - k] == None)
+												{
+													game.map[i + k][j - k] = White;
+													//printf("反对角线玩家四子，阻挡玩家五子\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+									}
+								}
+								//判断行电脑是否有三子，有的话连成四子
+								for (i = 0; i < 15; i++)
+								{
+									for (j = 0; j < 15 - 4; j++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i][j + k] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i][j + k] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum2 == 3)
+										{
+											if (sum1 == 1)
+											{
+												break;
+											}
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i][j + k] == None && ((game.map[i][j + k + 1] == White || game.map[i][j + k - 1] == White))
+													&& (j + k + 2) < COLS && (j + k - 2) > 0)
+												{
+													game.map[i][j + k] = White;
+													//printf("行电脑三子，连三成四\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断列电脑是否有三子，有的话连成四子
+								for (j = 0; j < 15; j++)
+								{
+									for (i = 0; i < 15 - 4; i++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i + k][j] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i + k][j] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum2 == 3)
+										{
+											if (sum1 == 1)
+											{
+												break;
+											}
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i + k][j] == None && ((game.map[i + k + 1][j] == White || game.map[i + k - 1][j] == White))
+													&& (i + k + 2) < ROWS && (i + k - 2) > 0)
+												{
+													game.map[i + k][j] = White;
+													//printf("列电脑三子，连三成四\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断对角线电脑是否有三子，有的话连成四子
+								for (i = 0; i < 15 - 4; i++)
+								{
+									for (j = 0; j < 15 - 4; j++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i + k][j + k] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i + k][j + k] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum2 == 3)
+										{
+											if (sum1 == 1)
+											{
+												break;
+											}
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i + k][j + k] == None && ((game.map[i + k + 1][j + k + 1] == White || game.map[i + k - 1][j + k - 1] == White))
+													&& (i + k + 2) < ROWS && (i + k - 2) > 0)
+												{
+													game.map[i + k][j + k] = White;
+													//printf("对角线电脑三子，连三成四\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断反对角线电脑是否有三子，有的话连成四子
+								for (i = 0; i < 15 - 4; i++)
+								{
+									for (j = 4; j < 15; j++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i + k][j - k] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i + k][j - k] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum2 == 3)
+										{
+											if (sum1 == 1)
+											{
+												break;
+											}
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i + k][j - k] == None && ((game.map[i + k + 1][j - k - 1] == White || game.map[i + k - 1][j - k + 1] == White))
+													&& (i + k + 2) < ROWS && (i + k - 2) > 0)
+												{
+													game.map[i + k][j - k] = White;
+													//printf("反对角线电脑三子，连三成四\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断行玩家是否连成三子，若连成三子，则堵住玩家
+								for (i = 0; i < 15; i++)
+								{
+									for (j = 0; j < 15 - 4; j++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i][j + k] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i][j + k] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum1 == 3)
+										{
+											if (sum2 == 1)
+											{
+												j++;
+												break;
+											}
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i][j + k] == None && (game.map[i][j + k + 1] == Black || game.map[i][j + k - 1] == Black)
+													&& (j + k + 2) < COLS && (j + k - 2) > 0)
+												{
+													game.map[i][j + k] = White;
+													//printf("行玩家三子，阻挡玩家四子\n");
+													goto change;
+												}
+											}
+										}
+
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断列玩家是否连成三子，若连成三子，则堵住玩家
+								for (j = 0; j < 15; j++)
+								{
+									for (i = 0; i < 15 - 4; i++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i + k][j] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i + k][j] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum1 == 3)
+										{
+											if (sum2 == 1)
+											{
+												i++;
+												break;
+											}
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i + k][j] == None && (game.map[i + k + 1][j] == Black || game.map[i + k - 1][j] == Black)
+													&& (i + k + 2) < ROWS && (i + k - 2) > 0)
+												{
+													game.map[i + k][j] = White;
+													//printf("列玩家三子，阻挡玩家四子\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断对角线玩家是否连成三子，若连成三子，则堵住玩家
+								for (i = 0; i < 15 - 4; i++)
+								{
+									for (j = 0; j < 15 - 4; j++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i + k][j + k] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i + k][j + k] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum1 == 3)
+										{
+											if (sum2 == 1)
+											{
+												break;
+											}
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i + k][j + k] == None && (game.map[i + k + 1][j + k + 1] == Black || game.map[i + k - 1][j + k - 1] == Black)
+													&& (i + k + 2) < ROWS && (i + k - 2) > 0)
+												{
+													game.map[i + k][j + k] = White;
+													//printf("对角线玩家三子，阻挡玩家四子\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断反对角线玩家是否连成三子，若连成三子，则堵住玩家
+								for (i = 0; i < 15 - 4; i++)
+								{
+									for (j = 4; j < 15; j++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i + k][j - k] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i + k][j - k] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum1 == 3)
+										{
+											if (sum2 == 1)
+											{
+												break;
+											}
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i + k][j - k] == None && (game.map[i + k + 1][j - k - 1] == Black || game.map[i + k - 1][j - k + 1] == Black)
+													&& (i + k + 2) < ROWS && (i + k - 2) > 0)
+												{
+													game.map[i + k][j - k] = White;
+													//printf("反对角线玩家三子，阻挡玩家四子\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断行电脑是否连成两子，若连成两子，则下子使电脑连成三子
+								for (i = 0; i < 15; i++)
+								{
+									for (j = 0; j < 15 - 4; j++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i][j + k] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i][j + k] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum2 >= 1)
+										{
+											if (sum1 > 1)
+											{
+												break;
+											}
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i][j + k] == None && ((game.map[i][j + k + 1] == White || game.map[i][j + k - 1] == White))
+													&& (j + k + 2) < COLS && (j + k - 2) > 0)
+												{
+													game.map[i][j + k] = White;
+													//printf("行电脑二子，连二成三\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断列电脑是否连成两子，若连成两子，则下子使电脑连成三子
+								for (j = 0; j < 15; j++)
+								{
+									for (i = 0; i < 15 - 4; i++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i + k][j] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i + k][j] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum2 >= 1)
+										{
+											if (sum1 > 1)
+											{
+												break;
+											}
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i + k][j] == None && ((game.map[i + k + 1][j] == White || game.map[i + k - 1][j] == White))
+													&& (i + k + 2) < ROWS && (i + k - 2) > 0)
+												{
+													game.map[i + k][j] = White;
+													//printf("列电脑二子，连二成三\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断对角线电脑是否连成两子，若连成两子，则下子使电脑连成三子
+								for (i = 0; i < 15 - 4; i++)
+								{
+									for (j = 0; j < 15 - 4; j++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i + k][j + k] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i + k][j + k] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum2 >= 1)
+										{
+											if (sum1 > 1)
+											{
+												break;
+											}
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i + k][j + k] == None && ((game.map[i + k + 1][j + k + 1] == White || game.map[i + k - 1][j + k - 1] == White))
+													&& (i + k + 2) < ROWS && (i + k - 2) > 0)
+												{
+													game.map[i + k][j + k] = White;
+													//printf("对角线电脑二子，连二成三\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+									}
+								}
+
+								//判断反对角线电脑是否连成两子，若连成两子，则下子使电脑连成三子
+								for (i = 0; i < 15 - 4; i++)
+								{
+									for (j = 4; j < 15; j++)
+									{
+										for (k = 0; k < 5; k++)
+										{
+											if (game.map[i + k][j - k] == Black)
+											{
+												sum1++;
+											}
+											else if (game.map[i + k][j - k] == White)
+											{
+												sum2++;
+											}
+										}
+										if (sum2 >= 1)
+										{
+											if (sum1 > 1)
+											{
+												break;
+											}
+											for (k = 0; k < 5; k++)
+											{
+												if (game.map[i + k][j - k] == None && ((game.map[i + k + 1][j - k - 1] == White || game.map[i + k - 1][j - k + 1] == White))
+													&& (i + k + 2) < ROWS && (i + k - 2) > 0)
+												{
+													game.map[i + k][j - k] = White;
+													//printf("反对角线电脑二子，连二成三\n");
+													goto change;
+												}
+											}
+										}
+										sum1 = sum2 = 0;
+										
+									}
+								}
+							// 如果人已经落子，AI在四周随机落子
+											
+								for (int i = 0; i < 4; i++)
+											{
+												int newRow = game.row + dx1[i];
+												int newCol = game.col + dy1[i];
+												if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS && game.map[newRow][newCol] == None)
+												{
+													randPos[count][0] = newRow;
+													randPos[count][1] = newCol;
+													count++;
+												}
+											}
+											if (count > 0)
+											{
+												int randomIndex = rand() % count;
+												game.map[randPos[randomIndex][0]][randPos[randomIndex][1]] = White;
+											}
+											goto change;
+							change:
+								game.currentChessType = (ChessType)-game.currentChessType;
+							}
+						}
+					}
+				
+                 }
             }
 
             render(&game);
@@ -324,33 +1070,32 @@ void init(Game* pthis, int w, int h)
 
 void render(Game* pthis)
 {
-    // 绘制棋子
-    for (int i = 0; i < ROWS; i++)
-    {
-        for (int k = 0; k < COLS; k++)
-        {
-            if (pthis->map[i][k] != None)
-            {
-                // 求每个格子左上角的坐标
-                int x = k * GRID_SIZE + XOFFSET;
-                int y = i * GRID_SIZE + YOFFSET;
+	// 绘制棋子
+	for (int i = 0; i < ROWS; i++)
+	{
+		for (int k = 0; k < COLS; k++)
+		{
+			if (pthis->map[i][k] != None)
+			{
+				// 求每个格子左上角的坐标
+				int x = k * GRID_SIZE + XOFFSET;
+				int y = i * GRID_SIZE + YOFFSET;
 
-                // 绘制棋子
-                if (pthis->map[i][k] == White)
-                {
-                    setfillcolor(WHITE);
-                }
-                else if (pthis->map[i][k] == Black)
-                {
-                    setfillcolor(BLACK);
-                }
+				// 绘制棋子
+				if (pthis->map[i][k] == White)
+				{
+					setfillcolor(WHITE);
+				}
+				else if (pthis->map[i][k] == Black)
+				{
+					setfillcolor(BLACK);
+				}
 
-                solidcircle(x, y, 15);
-            }
+				solidcircle(x, y, 15);
+			}
 
-        }
-    }
-
+		}
+	}
     // 在右上角显示当前下棋方提示信息
     settextcolor(WHITE);
     settextstyle(20, 0, _T("宋体"));
@@ -515,6 +1260,938 @@ bool RightOblique(Game* pthis, int chess)
 
 
 // 困难难度人机落子（此处仅为占位，实际需实现剪枝和决策树算法）
+
+
+
+
+
+
+/*
+int Isfull(char game.map[][col], int x, int y, int num)
+{
+	int i = 0;
+	int j = 0;
+	for (i = x - num; i <= x + num; i++)
+	{
+		for (j = y - num; j <= y + num; j++)
+		{
+			if (i < 0 || j < 0 || i >= row || j >= col)
+			{
+				continue;
+			}
+			if (game.map[i][j] == None)
+			{
+				return 0;
+			}
+		}
+	}
+	goto change;
+}
+
+
+int youhua(char game.map[][col], int 15, int 15)
+{
+	int i = 0;
+	int j = 0;
+	int k = 0;
+	int sum1 = 0;
+	int sum2 = 0;
+	//判断行电脑是否已经连成四子，如果连成四子，则下第五子获得胜利
+	for (i = 0; i < 15; i++)
+	{
+		for (j = 0; j < 15 - 4; j++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i][j + k] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i][j + k] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum2 > 3)
+			{
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i][j + k] == None)
+					{
+						game.map[i][j + k] = White;
+						//printf("行四子连五\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+	//判断列电脑是否已经连成四子，如果连成四子，则下第五子获得胜利
+	for (j = 0; j < 15; j++)
+	{
+		for (i = 0; i < 15 - 4; i++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i + k][j] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i + k][j] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum2 > 3)
+			{
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i + k][j] == None)
+					{
+						game.map[i + k][j] = White;
+						//printf("列四子连五\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+	//判断对角线电脑是否已经连成四子，如果连成四子，则下第五子获得胜利
+	for (i = 0; i < 15 - 4; i++)
+	{
+		for (j = 0; j < 15 - 4; j++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i + k][j + k] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i + k][j + k] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum2 > 3)
+			{
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i + k][j + k] == None)
+					{
+						game.map[i + k][j + k] = White;
+						//printf("对角线四子连五\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+	//判断反对角线电脑是否已经连成四子，如果连成四子，则下第五子获得胜利
+	for (i = 0; i < 15 - 4; i++)
+	{
+		for (j = 4; j < 15; j++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i + k][j - k] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i + k][j - k] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum2 > 3)
+			{
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i + k][j - k] == None)
+					{
+						game.map[i + k][j - k] = White;
+						//printf("反对角线四子连五\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+
+
+	//判断行玩家是否已经连成四子，如果连成四子，则下子阻挡玩家获得胜利
+	for (i = 0; i < 15; i++)
+	{
+		for (j = 0; j < 15 - 4; j++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i][j + k] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i][j + k] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum1 > 3)
+			{
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i][j + k] == None)
+					{
+						game.map[i][j + k] = White;
+						//printf("行玩家四子，阻挡玩家五子\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+	//判断列玩家是否已经连成四子，如果连成四子，则下子阻挡玩家获得胜利
+	for (j = 0; j < 15; j++)
+	{
+		for (i = 0; i < 15 - 4; i++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i + k][j] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i + k][j] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum1 > 3)
+			{
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i + k][j] == None)
+					{
+						game.map[i + k][j] = White;
+						//printf("列玩家四子，阻挡玩家五子\n");
+						goto change;
+					}
+				}
+			}
+
+			sum1 = sum2 = 0;
+		}
+	}
+
+	//判断对角线玩家是否已经连成四子，如果连成四子，则下子阻挡玩家获得胜利
+	for (i = 0; i < 15 - 4; i++)
+	{
+		for (j = 0; j < 15 - 4; j++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i + k][j + k] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i + k][j + k] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum1 > 3)
+			{
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i + k][j + k] == None)
+					{
+						game.map[i + k][j + k] = White;
+						//printf("对角线玩家四子，阻挡玩家五子\n");
+						goto change;
+					}
+				}
+			}
+
+			sum1 = sum2 = 0;
+		}
+	}
+
+	//判断反对角线玩家是否已经连成四子，如果连成四子，则下子阻挡玩家获得胜利
+	for (i = 0; i < 15 - 4; i++)
+	{
+		for (j = 4; j < 15; j++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i + k][j - k] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i + k][j - k] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum1 > 3)
+			{
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i + k][j - k] == None)
+					{
+						game.map[i + k][j - k] = White;
+						//printf("反对角线玩家四子，阻挡玩家五子\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+
+
+	//判断行电脑是否有三子，有的话连成四子
+	for (i = 0; i < 15; i++)
+	{
+		for (j = 0; j < 15 - 4; j++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i][j + k] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i][j + k] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum2 == 3)
+			{
+				if (sum1 == 1)
+				{
+					break;
+				}
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i][j + k] == None && ((game.map[i][j + k + 1] == White || game.map[i][j + k - 1] == White))
+						&& (j + k + 2) < col && (j + k - 2) > 0)
+					{
+						game.map[i][j + k] = White;
+						//printf("行电脑三子，连三成四\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+	//判断列电脑是否有三子，有的话连成四子
+	for (j = 0; j < 15; j++)
+	{
+		for (i = 0; i < 15 - 4; i++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i + k][j] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i + k][j] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum2 == 3)
+			{
+				if (sum1 == 1)
+				{
+					break;
+				}
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i + k][j] == None && ((game.map[i + k + 1][j] == White || game.map[i + k - 1][j] == White))
+						&& (i + k + 2) < row && (i + k - 2) > 0)
+					{
+						game.map[i + k][j] = White;
+						//printf("列电脑三子，连三成四\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+	//判断对角线电脑是否有三子，有的话连成四子
+	for (i = 0; i < 15 - 4; i++)
+	{
+		for (j = 0; j < 15 - 4; j++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i + k][j + k] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i + k][j + k] == White)
+				{ 
+					sum2++;
+				}
+			}
+			if (sum2 == 3)
+			{
+				if (sum1 == 1)
+				{
+					break;
+				}
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i + k][j + k] == None && ((game.map[i + k + 1][j + k + 1] == White || game.map[i + k - 1][j + k - 1] == White))
+						&& (i + k + 2) < row && (i + k - 2) > 0)
+					{
+						game.map[i + k][j + k] = White;
+						//printf("对角线电脑三子，连三成四\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+	//判断反对角线电脑是否有三子，有的话连成四子
+	for (i = 0; i < 15 - 4; i++)
+	{
+		for (j = 4; j < 15; j++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i + k][j - k] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i + k][j - k] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum2 == 3)
+			{
+				if (sum1 == 1)
+				{
+					break;
+				}
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i + k][j - k] == None && ((game.map[i + k + 1][j - k - 1] == White || game.map[i + k - 1][j - k + 1] == White))
+						&& (i + k + 2) < row && (i + k - 2) > 0)
+					{
+						game.map[i + k][j - k] = White;
+						//printf("反对角线电脑三子，连三成四\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+
+	//判断行玩家是否连成三子，若连成三子，则堵住玩家
+	for (i = 0; i < 15; i++)
+	{
+		for (j = 0; j < 15 - 4; j++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i][j + k] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i][j + k] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum1 == 3)
+			{
+				if (sum2 == 1)
+				{
+					j++;
+					break;
+				}
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i][j + k] == None && (game.map[i][j + k + 1] == Black || game.map[i][j + k - 1] == Black)
+						&& (j + k + 2) < col && (j + k - 2) > 0)
+					{
+						game.map[i][j + k] = White;
+						//printf("行玩家三子，阻挡玩家四子\n");
+						goto change;
+					}
+				}
+			}
+
+			sum1 = sum2 = 0;
+		}
+	}
+
+	//判断列玩家是否连成三子，若连成三子，则堵住玩家
+	for (j = 0; j < 15; j++)
+	{
+		for (i = 0; i < 15 - 4; i++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i + k][j] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i + k][j] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum1 == 3)
+			{
+				if (sum2 == 1)
+				{
+					i++;
+					break;
+				}
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i + k][j] == None && (game.map[i + k + 1][j] == Black || game.map[i + k - 1][j] == Black)
+						&& (i + k + 2) < row && (i + k - 2) > 0)
+					{
+						game.map[i + k][j] = White;
+						//printf("列玩家三子，阻挡玩家四子\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+	//判断对角线玩家是否连成三子，若连成三子，则堵住玩家
+	for (i = 0; i < 15 - 4; i++)
+	{
+		for (j = 0; j < 15 - 4; j++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i + k][j + k] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i + k][j + k] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum1 == 3)
+			{
+				if (sum2 == 1)
+				{
+					break;
+				}
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i + k][j + k] == None && (game.map[i + k + 1][j + k + 1] == Black || game.map[i + k - 1][j + k - 1] == Black)
+						&& (i + k + 2) < row && (i + k - 2) > 0)
+					{
+						game.map[i + k][j + k] = White;
+						//printf("对角线玩家三子，阻挡玩家四子\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+	//判断反对角线玩家是否连成三子，若连成三子，则堵住玩家
+	for (i = 0; i < 15 - 4; i++)
+	{
+		for (j = 4; j < 15; j++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i + k][j - k] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i + k][j - k] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum1 == 3)
+			{
+				if (sum2 == 1)
+				{
+					break;
+				}
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i + k][j - k] == None && (game.map[i + k + 1][j - k - 1] == Black || game.map[i + k - 1][j - k + 1] == Black)
+						&& (i + k + 2) < row && (i + k - 2) > 0)
+					{
+						game.map[i + k][j - k] = White;
+						//printf("反对角线玩家三子，阻挡玩家四子\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+
+
+
+	//判断行电脑是否连成两子，若连成两子，则下子使电脑连成三子
+	for (i = 0; i < 15; i++)
+	{
+		for (j = 0; j < 15 - 4; j++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i][j + k] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i][j + k] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum2 >= 1)
+			{
+				if (sum1 > 1)
+				{
+					break;
+				}
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i][j + k] == None && ((game.map[i][j + k + 1] == White || game.map[i][j + k - 1] == White))
+						&& (j + k + 2) < col && (j + k - 2) > 0)
+					{
+						game.map[i][j + k] = White;
+						//printf("行电脑二子，连二成三\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+	//判断列电脑是否连成两子，若连成两子，则下子使电脑连成三子
+	for (j = 0; j < 15; j++)
+	{
+		for (i = 0; i < 15 - 4; i++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i + k][j] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i + k][j] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum2 >= 1)
+			{
+				if (sum1 > 1)
+				{
+					break;
+				}
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i + k][j] == None && ((game.map[i + k + 1][j] == White || game.map[i + k - 1][j] == White))
+						&& (i + k + 2) < row && (i + k - 2) > 0)
+					{
+						game.map[i + k][j] = White;
+						//printf("列电脑二子，连二成三\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+	//判断对角线电脑是否连成两子，若连成两子，则下子使电脑连成三子
+	for (i = 0; i < 15 - 4; i++)
+	{
+		for (j = 0; j < 15 - 4; j++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i + k][j + k] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i + k][j + k] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum2 >= 1)
+			{
+				if (sum1 > 1)
+				{
+					break;
+				}
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i + k][j + k] == None && ((game.map[i + k + 1][j + k + 1] == White || game.map[i + k - 1][j + k - 1] == White))
+						&& (i + k + 2) < row && (i + k - 2) > 0)
+					{
+						game.map[i + k][j + k] = White;
+						//printf("对角线电脑二子，连二成三\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+	//判断反对角线电脑是否连成两子，若连成两子，则下子使电脑连成三子
+	for (i = 0; i < 15 - 4; i++)
+	{
+		for (j = 4; j < 15; j++)
+		{
+			for (k = 0; k < 5; k++)
+			{
+				if (game.map[i + k][j - k] == Black)
+				{
+					sum1++;
+				}
+				else if (game.map[i + k][j - k] == White)
+				{
+					sum2++;
+				}
+			}
+			if (sum2 >= 1)
+			{
+				if (sum1 > 1)
+				{
+					break;
+				}
+				for (k = 0; k < 5; k++)
+				{
+					if (game.map[i + k][j - k] == None && ((game.map[i + k + 1][j - k - 1] == White || game.map[i + k - 1][j - k + 1] == White))
+						&& (i + k + 2) < row && (i + k - 2) > 0)
+					{
+						game.map[i + k][j - k] = White;
+						//printf("反对角线电脑二子，连二成三\n");
+						goto change;
+					}
+				}
+			}
+			sum1 = sum2 = 0;
+		}
+	}
+
+	return 0;
+}
+
+void Computermove(char game.map[][col], int 15, int 15, int a[2])
+{
+	int x = 0;
+	int y = 0;
+	int i = 0;
+	int x1 = a[0];
+	int y1 = a[1];
+	printf("电脑下棋\n");
+	int re = youhua(game.map, 15, 15);
+	if (re == 0)
+	{
+		while (1)
+		{
+			x = rand() % 15;
+			y = rand() % 15;
+			int tmp = 0;
+			if (game.map[x][y] == None)
+			{
+				if (x <= x1 + 1 && x >= x1 - 1 && y <= y1 + 1 && y >= y1 - 1)
+				{
+					game.map[x][y] = White;
+					//printf("随机落子\n");
+					break;
+				}
+				else
+				{
+					for (i = 1; i <= row / 2; i++)
+					{
+						if (Isfull(game.map, x1, y1, i))
+						{
+							if (x <= x1 + i + 1 && x >= x1 - (i + 1) && y <= y1 + i + 1 && y >= y1 - (i + 1))
+							{
+								game.map[x][y] = White;
+								tmp = 1;
+								//printf("随机落子\n");
+								break;
+							}
+						}
+						else
+						{
+							break;
+						}
+					}
+					if (tmp)
+					{
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+void aiMoveHard(Game* pthis)
+{
+	char game.map[ROWS][COLS];
+	// 将 Game 结构体中的棋盘信息转换为字符棋盘，方便复用已有的逻辑函数
+	for (int i = 0; i < ROWS; i++) {
+		for (int j = 0; j < COLS; j++) {
+			if (pthis->map[i][j] == None) {
+				game.map[i][j] = None;
+			}
+			else if (pthis->map[i][j] == White) {
+				game.map[i][j] = White;
+			}
+			else if (pthis->map[i][j] == Black) {
+				game.map[i][j] = Black;
+			}
+		}
+	}
+
+	int a[2] = { pthis->row, pthis->col };  // 传递当前鼠标所在位置（或玩家最近落子位置）
+	Computermove(game.map, ROWS, COLS, a);
+
+	// 将更新后的字符棋盘信息转换回 Game 结构体中的棋盘
+	for (int i = 0; i < ROWS; i++) {
+		for (int j = 0; j < COLS; j++) {
+			if (game.map[i][j] == White) {
+				pthis->map[i][j] = White;
+			}
+			else if (game.map[i][j] == Black) {
+				pthis->map[i][j] = Black;
+			}
+			else {
+				pthis->map[i][j] = None;
+			}
+		}
+	}
+
+	pthis->currentChessType = (ChessType)-pthis->currentChessType;
+}
+*/
+
+/*
 void aiMoveHard(Game* pthis) {
 
 }
+
+int gobang_getScore(int self, int e)
+{
+    if (self > 5) return 20000;
+    if (self == 5 && e == 0) return 20000;
+    if (self == 5 && e == 1) return 20000;
+    if (self == 5 && e == 2) return 20000;
+    if (self == 4 && e == 0) return 1000;
+    if (self == 4 && e == 1) return 3000;
+    if (self == 4 && e == 2) return 5000;
+    if (self == 3 && e == 0) return 500;
+    if (self == 3 && e == 1) return 1000;
+    if (self == 3 && e == 2) return 3000;
+    if (self == 2 && e == 0) return 100;
+    if (self == 2 && e == 1) return 200;
+    if (self == 2 && e == 2) return 500;
+    if (self == 1 && e == 0) return 30;
+    if (self == 1 && e == 1) return 50;
+    if (self == 1 && e == 2) return 100;
+    return 0;
+}
+
+int gobang_getHorizontalScore(Gobang* pthis, int r, int c, int pieces)
+{
+    int self = 1;
+    int ai = 0;
+    //从c向左遍历，直到遇到空白或者其他的棋子，停止统计
+    for (int i = c - 1; i >= 0; i--)
+    {
+        if (pthis->map[r][i] == pieces)
+        {
+            self++;
+        }
+        else if (pthis->map[r][i] == None)
+        {
+            break;
+        }
+        else
+        {
+            ai++;
+            break;
+        }
+    }
+    for (int i = c + 1; i < COLS; i++)
+    {
+        if (pthis->map[r][i] == pieces)
+        {
+            self++;
+        }
+        else if (pthis->map[r][i] == None)
+        {
+            break;
+        }
+        else
+        {
+            ai++;
+            break;
+        }
+    }
+    return 0;
+}
+
+int gobang_getScore(Gobang* pthis, int r, int c)
+{
+    int numH1 = gobang_getHorizontalScore(pthis, r, c, Black);
+    int numH2 = gobang_getHorizontalScore(pthis, r, c, White);
+    int numV1 = gobang_getVerticalScore(pthis, r, c, Black);
+    int numV2 = gobang_getVerticalScore(pthis, r, c, White);
+    int numL1 = gobang_getLhtScore(pthis, r, c, Black);
+    int numL2 = gobang_getLhtScore(pthis, r, c, White);
+    int numR1 = gobang_getRhtScore(pthis, r, c, Black);
+    int numR2 = gobang_getRhtScore(pthis, r, c, White);
+
+    if (numH1 >= 200000 || numH2 >= 200000 || numV1 >= 200000 || numV2 >= 200000 ||
+        numL1 >= 200000 || numL2 >= 200000 || numR1 >= 200000 || numR2 >= 200000)
+    {
+        return INT_MAX;
+    }
+
+    int xScore = gobang_getHorizontalScore(pthis, r, c, Black) + gobang_getHorizontalScore(pthis, r, c, White);
+    int yScore = gobang_getVerticalScore(pthis, r, c, Black) + gobang_getVerticalScore(pthis, r, c, White);
+    int lScore = gobang_getLhtScore(pthis, r, c, Black) + gobang_getLhtScore(pthis, r, c, White);
+    int rScore = gobang_getRhtScore(pthis, r, c, Black) + gobang_getRhtScore(pthis, r, c, White);
+
+    return xScore + yScore + lScore + rScore;
+}
+*/
