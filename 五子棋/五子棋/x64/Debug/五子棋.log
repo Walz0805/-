@@ -1,3 +1,4 @@
 ﻿  main.cpp
-E:\五子棋1\wuziqi\五子棋\main.cpp(1052,15): warning C4244: “参数”: 从“time_t”转换到“unsigned int”，可能丢失数据
+E:\五子棋1\wuziqi\五子棋\main.cpp(65,9): warning C4101: “mode”: 未引用的局部变量
+E:\五子棋1\wuziqi\五子棋\main.cpp(1064,15): warning C4244: “参数”: 从“time_t”转换到“unsigned int”，可能丢失数据
   五子棋.vcxproj -> E:\五子棋1\wuziqi\五子棋\x64\Debug\五子棋.exe

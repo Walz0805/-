@@ -47,45 +47,57 @@ void init(Game* pthis, int w, int h);
 void render(Game* pthis);
 // 游戏更新
 void update(Game* pthis);
-
+void cho(Game* pthis);
 bool horiaontal(Game* pthis, int chess);
 bool vertical(Game* pthis, int chess);
 bool leftOblique(Game* pthis, int chess);
 bool RightOblique(Game* pthis, int chess);
 bool judge(Game* pthis);
 
-// 困难难度人机落子void aiMoveHard(Game* pthis);
+
 
 int main()
 {
     Game game;
     init(&game, 960, 600);
-
+	
     // 选择游戏模式
     int mode;
-    printf("选择游戏模式：0 - 人人对战，1 - 人机对战\n");
-    scanf_s("%d", &mode);
-    game.gameMode = mode;
-
-    if (game.gameMode == 1)
-    {
-        // 选择难度
-        int diff;
-        printf("选择难度：0 - 简单，1 - 困难\n");
-        scanf_s("%d", &diff);
-        game.difficulty = diff;
-    }
-
     // 用于记录开始时间，以判断是否到了1秒
     clock_t start_time = clock();
 
     // 图片，先加载begin.jpg用于开始显示
-    IMAGE img_begin, img_bg;
+    IMAGE img_begin, img_bg,img_c;
     // 使用宽字符字符串，解决字符集相关问题
-    loadimage(&img_begin, L"Resource/images/begin.jpg");
+	loadimage(&img_c, L"Resource/images/choose.jpg");
+	loadimage(&img_begin, L"Resource/images/begin.jpg");
     loadimage(&img_bg, L"Resource/images/bk.jpg");
 
     // 处理鼠标操作，不断地去处理
+	putimage(0, 0, &img_c);
+	
+	//cho(&game);
+	/*int cho = 0;
+	while (cho == 0) {
+	putimage(0, 0, &img_c);
+	if (game.msg.message == WM_LBUTTONDOWN &&    // 鼠标左键点击
+		game.row >130&&game.row<600 &&game.col>300&& game.col< 378)
+	{
+		game.gameMode = 0;
+		cho = 1;
+	}
+	else if (game.msg.message == WM_LBUTTONDOWN &&    // 鼠标左键点击
+		game.row > 10 && game.row < 690 && game.col>390 && game.col < 470) {
+		game.gameMode = 1;
+		game.difficulty = 0;
+		cho = 1;
+	}
+	else {
+		game.gameMode = 1;
+		game.difficulty = 1;
+		cho = 1;
+	}
+	}*/
     // 游戏主循环
     while (game.isRunning)
     {
@@ -1068,6 +1080,31 @@ void init(Game* pthis, int w, int h)
     memset(pthis->map, 0, sizeof(pthis->map));
 }
 
+/*void cho(Game* pthis)
+{
+	int cho = 0;
+	while (cho == 0) {
+		
+		if (pthis->msg.message == WM_LBUTTONDOWN &&    // 鼠标左键点击
+			pthis->col > 130 && pthis->col < 600 && pthis->row>300 && pthis->row < 378)
+		{
+			pthis->gameMode = 0;
+			cho = 1;
+		}
+		else if (pthis->msg.message == WM_LBUTTONDOWN &&    // 鼠标左键点击
+			pthis->col > 10 && pthis->col < 690 && pthis->row>390 && pthis->row < 470) {
+			pthis->gameMode = 1;
+			pthis->difficulty = 0;
+			cho = 1;
+		}
+		else {
+			pthis->gameMode = 1;
+			pthis->difficulty = 1;
+			cho = 1;
+		}
+	}
+	
+}*/
 void render(Game* pthis)
 {
 	// 绘制棋子
